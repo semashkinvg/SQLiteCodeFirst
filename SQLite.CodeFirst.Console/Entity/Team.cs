@@ -12,6 +12,7 @@ namespace SQLite.CodeFirst.Console.Entity
         [Index("IX_Team_TeamsName")] // Test for named index.
         [Required]
         public string Name { get; set; }
+        public string Name2 { get; set; }
 
         public virtual Coach Coach { get; set; }
 
