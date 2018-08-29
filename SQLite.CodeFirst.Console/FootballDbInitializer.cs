@@ -9,6 +9,8 @@ namespace SQLite.CodeFirst.Console
     // changed the base class SqliteDropCreateDatabaseWhenModelChanges to SqliteCreateDatabaseIfNotExists
     public class FootballDbInitializer : SqliteCreateDatabaseIfNotExists<FootballDbContext>
     {
+        private const string DefaultValueMetadataName =
+            "http://schemas.microsoft.com/ado/2013/11/edm/customannotation:SqlDefaultValueAttribute";
         public FootballDbInitializer(DbModelBuilder modelBuilder)
             : base(modelBuilder, true)
         { }
@@ -47,11 +49,18 @@ namespace SQLite.CodeFirst.Console
                         var cur = context.Database.SqlQuery<TableInfo>($"PRAGMA table_info ({tableName})").ToList();
                         if (cur.All(a => a.name != member.Name))
                         {
-                            // added a very simple implementation here
-                            // in real project i would add the checks like is certain type of metadata exists or not
-                            // + column name should be taken from metadata as well coz it can be declared by an attribute
-                            context.Database.ExecuteSqlCommand(
-                                $"ALTER TABLE {tableName} ADD COLUMN {member.Name} {((TypeUsage)((ReadOnlyMetadataCollection<System.Data.Entity.Core.Metadata.Edm.MetadataProperty>)member.MetadataProperties["MetadataProperties"].Value)["TypeUsage"].Value).EdmType.Name} null;");
+                            if (member.MetadataProperties.Any(a => a.Name == DefaultValueMetadataName))
+                            {
+                                var defaultValue = (SqlDefaultValueAttribute)member.MetadataProperties[DefaultValueMetadataName].Value;
+                                context.Database.ExecuteSqlCommand(
+                                    $"ALTER TABLE {tableName} ADD COLUMN {member.Name} {GetTypeUsage(member)} DEFAULT '{defaultValue.DefaultValue}';");
+                            }
+                            else
+                            {
+                                context.Database.ExecuteSqlCommand(
+                                    $"ALTER TABLE {tableName} ADD COLUMN {member.Name} {GetTypeUsage(member)} null;");
+                            }
+
                         }
                     }
 
@@ -59,6 +68,11 @@ namespace SQLite.CodeFirst.Console
             }
 
             base.InitializeDatabase(context);
+        }
+
+        private static string GetTypeUsage(EdmMember member)
+        {
+            return ((TypeUsage)((ReadOnlyMetadataCollection<System.Data.Entity.Core.Metadata.Edm.MetadataProperty>)member.MetadataProperties["MetadataProperties"].Value)["TypeUsage"].Value).EdmType.Name;
         }
 
         private class TableInfo

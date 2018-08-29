@@ -14,6 +14,14 @@ namespace SQLite.CodeFirst.Console.Entity
         public string Name { get; set; }
         public string Name2 { get; set; }
 
+        [Column("NoName")]
+        [SqlDefaultValue(DefaultValue = "N")]
+        public string Name3 { get; set; }
+
+        [Column("IntegerValue")]
+        [SqlDefaultValue(DefaultValue = "123")]
+        public int IntColumn { get; set; }
+
         public virtual Coach Coach { get; set; }
 
         public virtual ICollection<Player> Players { get; set; }

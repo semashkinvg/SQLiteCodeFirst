@@ -1,8 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using SQLite.CodeFirst.Console.Entity;
+using System.Collections.Generic;
 using System.Data.Entity;
 using System.Data.SQLite;
 using System.Linq;
-using SQLite.CodeFirst.Console.Entity;
 
 namespace SQLite.CodeFirst.Console
 {
@@ -10,7 +10,7 @@ namespace SQLite.CodeFirst.Console
     {
         private static void Main()
         {
-            StartDemoUseInMemory();
+            //StartDemoUseInMemory();
             StartDemoUseFile();
             PressEnterToExit();
         }
